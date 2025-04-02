@@ -1,3 +1,5 @@
+using System.Text;
+
 namespace PWDGenerator
 {
     internal static class Program
@@ -14,74 +16,104 @@ namespace PWDGenerator
             Application.Run(new MainForm());
         }
 
-        public static void GenerateCombinations(string baseWord, int maxNumber, string fullPath, DateTime birthday)
+        public static void GenerateCombinations(string baseWord, int maxNumber, string fullPath, DateTime? birthday, string symbolsString)
         {
-            int maxLength = maxNumber.ToString().Length;
-            HashSet<string> generated = new();
+            File.AppendAllText(fullPath, "");
+            int maxLength = maxNumber == 0 ? 0 : maxNumber.ToString().Length;
+            HashSet<string> generated = [];
 
-            List<string> wordVariations = GenerateCapitalizationVariations(baseWord);
-            List<string> symbols = new() { "-", "_", "*", "!", "@", "#", ".", "," };
-            List<string> dateFormats = GenerateDateVariations(birthday);
+            List<string> symbols = symbolsString.Length == 0 ? [""] : symbolsString.ToList().ForEach(e => e.ToString());
+            List<string> wordVariations = baseWord == "" ? [""] : GenerateCapitalizationVariations(baseWord);
+            List<string> dateFormats = birthday.HasValue ? GenerateDateVariations(birthday.Value) : [];
+            //int combinationsCount = (maxLength > 0 ? 1 : 0) + (birthday.HasValue ? 1 : 0) + (symbolsString.Length > 0 ? 1 : 0);
+            List<string> combinationsNum = GenerateCombinationsFormat(3);
+            List<string> combinationsDate = GenerateCombinationsFormat(4);
 
-            string[] symbolCombinations = {
-                "{0}{1}", "{1}{0}", "{0}{1}{1}", "{1}{0}{1}", "{1}{1}{0}",
-                "{0}{1}{2}", "{0}{2}{1}", "{1}{0}{2}", "{2}{0}{1}", "{1}{2}{0}", "{2}{1}{0}",
-                "{2}{0}{1}{1}", "{2}{1}{0}{1}", "{2}{1}{1}{0}", "{0}{2}{1}{1}", "{1}{2}{1}{0}",
-                "{1}{2}{0}{1}", "{1}{0}{2}{1}", "{0}{1}{2}{1}", "{1}{1}{2}{0}",
-                "{1}{0}{1}{2}", "{0}{1}{1}{2}", "{1}{1}{0}{2}"
-            };
+            FileStream fs = File.Open(fullPath, FileMode.Append);
 
             foreach (string word in wordVariations)
             {
-                generated.Add(word);
-                for (int i = 1; i <= maxNumber; i++)
+                byte[] info = new UTF8Encoding(true).GetBytes(word + "\n");
+                fs.Write(info, 0, info.Length);
+                foreach (string symbol in symbols)
                 {
-                    for (int padding = 1; padding <= maxLength; padding++)
+                    foreach (string symbol2 in symbols.Skip(1).Concat(symbols.Take(1)))
                     {
-                        string formattedNumber = i.ToString().PadLeft(padding, '0');
-                        if (formattedNumber.ToString().Length >= 4) { generated.Add(formattedNumber); }
-                        generated.Add($"{word}{formattedNumber}");
-                        generated.Add($"{formattedNumber}{word}");
-                        foreach (string symbol in symbols)
+                        for (int i = 0; i <= maxNumber; i++)
                         {
-                            foreach (string format in symbolCombinations)
+                            string formattedNumber = i.ToString().PadLeft(maxLength, '0');
+                            foreach (string format in combinationsNum)
                             {
-                                generated.Add(string.Format(format, word, symbol, formattedNumber));
+                                info = new UTF8Encoding(true).GetBytes(string.Format(format, word, formattedNumber, symbol, symbol2) + "\n");
+                                fs.Write(info, 0, info.Length);
                             }
-                        }
-                        foreach (string date in dateFormats)
-                        {
-                            if (date.ToString().Length >= 4) { generated.Add(date); }
-                            generated.Add($"{word}{date}");
-                            generated.Add($"{date}{word}");
-                            generated.Add($"{word}{formattedNumber}{date}");
-                            generated.Add($"{word}{date}{formattedNumber}");
-                            generated.Add($"{date}{word}{formattedNumber}");
-                            generated.Add($"{formattedNumber}{word}{date}");
-                            foreach (string symbol in symbols)
-                            {
-                                generated.Add($"{symbol}{word}{formattedNumber}{date}");
-                                generated.Add($"{symbol}{word}{date}{formattedNumber}");
-                                generated.Add($"{symbol}{date}{word}{formattedNumber}");
-                                generated.Add($"{symbol}{formattedNumber}{word}{date}");
-                                generated.Add($"{word}{formattedNumber}{date}{symbol}");
-                                generated.Add($"{word}{date}{formattedNumber}{symbol}");
-                                generated.Add($"{date}{word}{formattedNumber}{symbol}");
-                                generated.Add($"{formattedNumber}{word}{date}{symbol}");
 
+                            foreach (string date in dateFormats)
+                            {
+                                foreach (string format in combinationsDate)
+                                {
+                                    info = new UTF8Encoding(true).GetBytes(string.Format(format, word, formattedNumber, date, symbol, symbol2) + "\n");
+                                    fs.Write(info, 0, info.Length);
+                                }
                             }
                         }
                     }
                 }
             }
 
-            File.WriteAllText(fullPath, string.Join("\n", generated));
+            fs.Close();
+
+            HashSet<string> uniqueLines = [];
+
+            using (StreamReader reader = new(fullPath))
+            {
+                string? line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line.Length >= 4)
+                    {
+                        uniqueLines.Add(line);
+                    }
+                }
+                reader.Close();
+            }
+            File.WriteAllLines(fullPath, uniqueLines);
+            uniqueLines = [];
+        }
+
+        public static List<string> GenerateCombinationsFormat(int n)
+        {
+            List<string> result = new();
+            GenerateCombinationsFormatRecursive(n, "", result);
+            return result;
+        }
+
+        private static void GenerateCombinationsFormatRecursive(int n, string current, List<string> result)
+        {
+            if (current.Length > 0)
+            {
+                result.Add(current);
+            }
+
+            if (current.Replace("{","").Replace("}","").Length == n+1)
+            {
+                return;
+            }
+
+            for (int i = 0; i <= n; i++)
+            {
+                if (current.Contains("{" + i + "}"))
+                {
+                    continue;
+                }
+                GenerateCombinationsFormatRecursive(n, current + "{" + i + "}", result);
+            }
         }
 
         static List<string> GenerateCapitalizationVariations(string word)
         {
             word = word.ToLower();
-            List<string> variations = new();
+            List<string> variations = [];
             int length = word.Length;
             int totalVariations = 1 << length; // 2^length possible variations
 
@@ -103,7 +135,7 @@ namespace PWDGenerator
 
         static List<string> GenerateDateVariations(DateTime dateTime)
         {
-            List<string> dates = new();
+            List<string> dates = [];
 
             string year = dateTime.Year.ToString(); // "2025"
             string shortYear = dateTime.ToString("yy"); // "25"

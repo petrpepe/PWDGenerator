@@ -40,15 +40,19 @@
             label5 = new Label();
             label6 = new Label();
             fileNameBox = new TextBox();
+            enabledBDCheckBox = new CheckBox();
+            label7 = new Label();
+            symbolsBox = new TextBox();
             SuspendLayout();
             // 
             // generateBtn
             // 
             generateBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            generateBtn.Font = new Font("Segoe UI", 10F);
+            generateBtn.Font = new Font("Segoe UI", 12F);
+            generateBtn.ForeColor = SystemColors.ControlText;
             generateBtn.Location = new Point(490, 36);
             generateBtn.Name = "generateBtn";
-            generateBtn.Size = new Size(123, 186);
+            generateBtn.Size = new Size(123, 217);
             generateBtn.TabIndex = 0;
             generateBtn.Text = "Generuj";
             generateBtn.UseVisualStyleBackColor = true;
@@ -88,7 +92,7 @@
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 10F);
-            label4.Location = new Point(16, 206);
+            label4.Location = new Point(16, 234);
             label4.Name = "label4";
             label4.Size = new Size(90, 19);
             label4.TabIndex = 4;
@@ -98,8 +102,9 @@
             // 
             keyWordBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             keyWordBox.Font = new Font("Segoe UI", 10F);
-            keyWordBox.Location = new Point(149, 36);
+            keyWordBox.Location = new Point(149, 39);
             keyWordBox.Name = "keyWordBox";
+            keyWordBox.PlaceholderText = "Heslo";
             keyWordBox.Size = new Size(335, 25);
             keyWordBox.TabIndex = 5;
             // 
@@ -107,18 +112,19 @@
             // 
             savePathBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             savePathBox.Font = new Font("Segoe UI", 10F);
-            savePathBox.Location = new Point(16, 238);
+            savePathBox.Location = new Point(16, 265);
             savePathBox.Multiline = true;
             savePathBox.Name = "savePathBox";
-            savePathBox.Size = new Size(597, 26);
+            savePathBox.Size = new Size(597, 29);
             savePathBox.TabIndex = 8;
             // 
             // maxNumBox
             // 
             maxNumBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             maxNumBox.Font = new Font("Segoe UI", 10F);
-            maxNumBox.Location = new Point(149, 76);
+            maxNumBox.Location = new Point(149, 79);
             maxNumBox.Name = "maxNumBox";
+            maxNumBox.PlaceholderText = "99";
             maxNumBox.Size = new Size(335, 25);
             maxNumBox.TabIndex = 9;
             maxNumBox.KeyPress += MaxNumBox_KeyPress;
@@ -126,23 +132,23 @@
             // birthdayPicker
             // 
             birthdayPicker.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            birthdayPicker.CustomFormat = "dd.MM.YYYY";
+            birthdayPicker.CustomFormat = " dd.MM.yyyy";
+            birthdayPicker.Enabled = false;
             birthdayPicker.Font = new Font("Segoe UI", 10F);
-            birthdayPicker.Location = new Point(149, 119);
+            birthdayPicker.Location = new Point(220, 119);
             birthdayPicker.MinDate = new DateTime(1900, 1, 1, 0, 0, 0, 0);
             birthdayPicker.Name = "birthdayPicker";
-            birthdayPicker.Size = new Size(335, 25);
+            birthdayPicker.Size = new Size(264, 25);
             birthdayPicker.TabIndex = 10;
-            birthdayPicker.Value = new DateTime(2025, 4, 2, 0, 0, 0, 0);
             // 
             // label5
             // 
             label5.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             label5.AutoSize = true;
-            label5.Font = new Font("Segoe UI", 14F);
-            label5.Location = new Point(191, 1);
+            label5.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            label5.Location = new Point(202, 8);
             label5.Name = "label5";
-            label5.Size = new Size(260, 25);
+            label5.Size = new Size(274, 25);
             label5.TabIndex = 11;
             label5.Text = "Generování hesel do souboru";
             label5.UseMnemonic = false;
@@ -151,7 +157,7 @@
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI", 10F);
-            label6.Location = new Point(16, 165);
+            label6.Location = new Point(16, 200);
             label6.Name = "label6";
             label6.Size = new Size(101, 19);
             label6.TabIndex = 12;
@@ -161,16 +167,51 @@
             // 
             fileNameBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             fileNameBox.Font = new Font("Segoe UI", 10F);
-            fileNameBox.Location = new Point(149, 162);
+            fileNameBox.Location = new Point(149, 197);
             fileNameBox.Name = "fileNameBox";
             fileNameBox.Size = new Size(335, 25);
             fileNameBox.TabIndex = 13;
+            // 
+            // enabledBDCheckBox
+            // 
+            enabledBDCheckBox.AutoSize = true;
+            enabledBDCheckBox.Font = new Font("Segoe UI", 10F);
+            enabledBDCheckBox.Location = new Point(149, 123);
+            enabledBDCheckBox.Name = "enabledBDCheckBox";
+            enabledBDCheckBox.Size = new Size(65, 23);
+            enabledBDCheckBox.TabIndex = 14;
+            enabledBDCheckBox.Text = "Použít";
+            enabledBDCheckBox.UseVisualStyleBackColor = true;
+            enabledBDCheckBox.CheckedChanged += EnabledBDCheckBox_CheckedChanged;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 10F);
+            label7.Location = new Point(16, 162);
+            label7.Name = "label7";
+            label7.Size = new Size(61, 19);
+            label7.TabIndex = 15;
+            label7.Text = "Symboly";
+            // 
+            // symbolsBox
+            // 
+            symbolsBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            symbolsBox.Font = new Font("Segoe UI", 10F);
+            symbolsBox.Location = new Point(149, 159);
+            symbolsBox.Name = "symbolsBox";
+            symbolsBox.PlaceholderText = "!,.* (neoddělovat, napsat za sebou)";
+            symbolsBox.Size = new Size(335, 25);
+            symbolsBox.TabIndex = 16;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(624, 281);
+            ClientSize = new Size(624, 311);
+            Controls.Add(symbolsBox);
+            Controls.Add(label7);
+            Controls.Add(enabledBDCheckBox);
             Controls.Add(fileNameBox);
             Controls.Add(label6);
             Controls.Add(label5);
@@ -183,12 +224,17 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(generateBtn);
-            MinimumSize = new Size(640, 320);
+            MinimumSize = new Size(640, 350);
             Name = "MainForm";
             Text = "Form1";
             Load += Form1_Load;
             ResumeLayout(false);
             PerformLayout();
+        }
+
+        private void BirthdayPicker_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            throw new NotImplementedException();
         }
         #endregion
 
@@ -204,5 +250,8 @@
         private Label label5;
         private Label label6;
         private TextBox fileNameBox;
+        private CheckBox enabledBDCheckBox;
+        private Label label7;
+        private TextBox symbolsBox;
     }
 }
