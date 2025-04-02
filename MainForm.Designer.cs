@@ -1,0 +1,208 @@
+﻿namespace PWDGenerator
+{
+    partial class MainForm
+    {
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
+        private System.ComponentModel.IContainer components = null;
+
+        /// <summary>
+        ///  Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        #region Windows Form Designer generated code
+
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
+        private void InitializeComponent()
+        {
+            generateBtn = new Button();
+            label1 = new Label();
+            label2 = new Label();
+            label3 = new Label();
+            label4 = new Label();
+            keyWordBox = new TextBox();
+            savePathBox = new TextBox();
+            maxNumBox = new TextBox();
+            birthdayPicker = new DateTimePicker();
+            label5 = new Label();
+            label6 = new Label();
+            fileNameBox = new TextBox();
+            SuspendLayout();
+            // 
+            // generateBtn
+            // 
+            generateBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            generateBtn.Font = new Font("Segoe UI", 10F);
+            generateBtn.Location = new Point(490, 36);
+            generateBtn.Name = "generateBtn";
+            generateBtn.Size = new Size(123, 186);
+            generateBtn.TabIndex = 0;
+            generateBtn.Text = "Generuj";
+            generateBtn.UseVisualStyleBackColor = true;
+            generateBtn.Click += GenerateBtn_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 10F);
+            label1.Location = new Point(16, 42);
+            label1.Name = "label1";
+            label1.Size = new Size(87, 19);
+            label1.TabIndex = 1;
+            label1.Text = "Klíčové slovo";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 10F);
+            label2.Location = new Point(16, 82);
+            label2.Name = "label2";
+            label2.Size = new Size(101, 19);
+            label2.TabIndex = 2;
+            label2.Text = "Maximální číslo";
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 10F);
+            label3.Location = new Point(16, 125);
+            label3.Name = "label3";
+            label3.Size = new Size(107, 19);
+            label3.TabIndex = 3;
+            label3.Text = "Datum narození";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 10F);
+            label4.Location = new Point(16, 206);
+            label4.Name = "label4";
+            label4.Size = new Size(90, 19);
+            label4.TabIndex = 4;
+            label4.Text = "Cesta uložení";
+            // 
+            // keyWordBox
+            // 
+            keyWordBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            keyWordBox.Font = new Font("Segoe UI", 10F);
+            keyWordBox.Location = new Point(149, 36);
+            keyWordBox.Name = "keyWordBox";
+            keyWordBox.Size = new Size(335, 25);
+            keyWordBox.TabIndex = 5;
+            // 
+            // savePathBox
+            // 
+            savePathBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            savePathBox.Font = new Font("Segoe UI", 10F);
+            savePathBox.Location = new Point(16, 238);
+            savePathBox.Multiline = true;
+            savePathBox.Name = "savePathBox";
+            savePathBox.Size = new Size(597, 26);
+            savePathBox.TabIndex = 8;
+            // 
+            // maxNumBox
+            // 
+            maxNumBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            maxNumBox.Font = new Font("Segoe UI", 10F);
+            maxNumBox.Location = new Point(149, 76);
+            maxNumBox.Name = "maxNumBox";
+            maxNumBox.Size = new Size(335, 25);
+            maxNumBox.TabIndex = 9;
+            maxNumBox.KeyPress += MaxNumBox_KeyPress;
+            // 
+            // birthdayPicker
+            // 
+            birthdayPicker.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            birthdayPicker.CustomFormat = "dd.MM.YYYY";
+            birthdayPicker.Font = new Font("Segoe UI", 10F);
+            birthdayPicker.Location = new Point(149, 119);
+            birthdayPicker.MinDate = new DateTime(1900, 1, 1, 0, 0, 0, 0);
+            birthdayPicker.Name = "birthdayPicker";
+            birthdayPicker.Size = new Size(335, 25);
+            birthdayPicker.TabIndex = 10;
+            birthdayPicker.Value = new DateTime(2025, 4, 2, 0, 0, 0, 0);
+            // 
+            // label5
+            // 
+            label5.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            label5.AutoSize = true;
+            label5.Font = new Font("Segoe UI", 14F);
+            label5.Location = new Point(191, 1);
+            label5.Name = "label5";
+            label5.Size = new Size(260, 25);
+            label5.TabIndex = 11;
+            label5.Text = "Generování hesel do souboru";
+            label5.UseMnemonic = false;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 10F);
+            label6.Location = new Point(16, 165);
+            label6.Name = "label6";
+            label6.Size = new Size(101, 19);
+            label6.TabIndex = 12;
+            label6.Text = "Název souboru";
+            // 
+            // fileNameBox
+            // 
+            fileNameBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            fileNameBox.Font = new Font("Segoe UI", 10F);
+            fileNameBox.Location = new Point(149, 162);
+            fileNameBox.Name = "fileNameBox";
+            fileNameBox.Size = new Size(335, 25);
+            fileNameBox.TabIndex = 13;
+            // 
+            // MainForm
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(624, 281);
+            Controls.Add(fileNameBox);
+            Controls.Add(label6);
+            Controls.Add(label5);
+            Controls.Add(birthdayPicker);
+            Controls.Add(maxNumBox);
+            Controls.Add(savePathBox);
+            Controls.Add(keyWordBox);
+            Controls.Add(label4);
+            Controls.Add(label3);
+            Controls.Add(label2);
+            Controls.Add(label1);
+            Controls.Add(generateBtn);
+            MinimumSize = new Size(640, 320);
+            Name = "MainForm";
+            Text = "Form1";
+            Load += Form1_Load;
+            ResumeLayout(false);
+            PerformLayout();
+        }
+        #endregion
+
+        private Button generateBtn;
+        private Label label1;
+        private Label label2;
+        private Label label3;
+        private Label label4;
+        private TextBox keyWordBox;
+        private TextBox savePathBox;
+        private TextBox maxNumBox;
+        private DateTimePicker birthdayPicker;
+        private Label label5;
+        private Label label6;
+        private TextBox fileNameBox;
+    }
+}
