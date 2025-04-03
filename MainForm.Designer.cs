@@ -45,6 +45,8 @@
             symbolsBox = new TextBox();
             maxCharLengthBox = new TextBox();
             label8 = new Label();
+            numOfSymbolsNBox = new NumericUpDown();
+            ((System.ComponentModel.ISupportInitialize)numOfSymbolsNBox).BeginInit();
             SuspendLayout();
             // 
             // generateBtn
@@ -54,7 +56,7 @@
             generateBtn.ForeColor = SystemColors.ControlText;
             generateBtn.Location = new Point(490, 36);
             generateBtn.Name = "generateBtn";
-            generateBtn.Size = new Size(123, 217);
+            generateBtn.Size = new Size(123, 260);
             generateBtn.TabIndex = 0;
             generateBtn.Text = "Generuj";
             generateBtn.UseVisualStyleBackColor = true;
@@ -199,11 +201,12 @@
             // symbolsBox
             // 
             symbolsBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            symbolsBox.Enabled = false;
             symbolsBox.Font = new Font("Segoe UI", 10F);
-            symbolsBox.Location = new Point(149, 159);
+            symbolsBox.Location = new Point(220, 159);
             symbolsBox.Name = "symbolsBox";
             symbolsBox.PlaceholderText = "!,.* (neoddělovat, napsat za sebou)";
-            symbolsBox.Size = new Size(335, 25);
+            symbolsBox.Size = new Size(264, 25);
             symbolsBox.TabIndex = 16;
             // 
             // maxCharLengthBox
@@ -227,11 +230,20 @@
             label8.TabIndex = 18;
             label8.Text = "Max délka hesla";
             // 
+            // numOfSymbolsNBox
+            // 
+            numOfSymbolsNBox.Location = new Point(149, 161);
+            numOfSymbolsNBox.Name = "numOfSymbolsNBox";
+            numOfSymbolsNBox.Size = new Size(65, 23);
+            numOfSymbolsNBox.TabIndex = 19;
+            numOfSymbolsNBox.ValueChanged += NumOfSymbolsNBox_ValueChanged;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(624, 361);
+            Controls.Add(numOfSymbolsNBox);
             Controls.Add(label8);
             Controls.Add(maxCharLengthBox);
             Controls.Add(symbolsBox);
@@ -253,6 +265,7 @@
             Name = "MainForm";
             Text = "Form1";
             Load += Form1_Load;
+            ((System.ComponentModel.ISupportInitialize)numOfSymbolsNBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -280,5 +293,6 @@
         private TextBox symbolsBox;
         private TextBox maxCharLengthBox;
         private Label label8;
+        private NumericUpDown numOfSymbolsNBox;
     }
 }

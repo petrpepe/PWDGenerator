@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Text;
 
 namespace PWDGenerator
 {
     internal static class Program
     {
+        private static int bufferLimit = 50000;
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -16,19 +18,15 @@ namespace PWDGenerator
             Application.Run(new MainForm());
         }
 
-        public static void GenerateCombinations(string keyword, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars)
+        public static void GenerateCombinations(string keyword, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols)
         {
             File.WriteAllText(fullPath, "");
-            List<string> wordVariations = keyword == "" ? [""] : GenerateCapitalizationVariations(keyword).ToHashSet().ToList();
+            List<string> wordVariations = keyword == "" ? [""] : [.. GenerateCapitalizationVariations(keyword)];
             int? maxLength = maxNumber == 0 ? null : maxNumber.ToString().Length;
-            List<string> dateFormats = birthday.HasValue ? GenerateDateVariations(birthday.Value).ToHashSet().ToList() : [];
-            List<string> combinations3 = GenerateCombinationsFormat(2).ToHashSet().ToList();
-            List<string> combinations4 = GenerateCombinationsFormat(3).ToHashSet().ToList();
-            List<string> combinations5 = GenerateCombinationsFormat(4).ToHashSet().ToList();
-            List<string> symbols = GenerateSymbolCombinations(symbolsString.ToCharArray()).ToHashSet().ToList();
-            List<string> numberVariations = new();
+            List<string> dateFormats = birthday.HasValue ? [.. GenerateDateVariations(birthday.Value)] : [];
+            List<string> symbols = [.. GenerateSymbolCombinations(symbolsString.ToCharArray())];
+            List<string> numberVariations = [];
             //int combinationsCount = (maxLength > 0 ? 1 : 0) + (birthday.HasValue ? 1 : 0) + (symbolsString.Length > 0 ? 1 : 0);
-
 
             for (int i = 0; i <= maxNumber; i++)
             {
@@ -44,66 +42,44 @@ namespace PWDGenerator
                 }
             }
 
-            FileStream fs = File.Open(fullPath, FileMode.Append);
-
-            List<List<string>> allLists = new() { wordVariations, dateFormats, numberVariations, symbols };
-            //List<string> combinations = 
-            GenerateCombinationsBetweenListsRecursive(allLists, "", 0, fs, maxChars);
-
-            /*
-            foreach (string word in wordVariations)
+            List<List<string>> allLists = [wordVariations, numberVariations, dateFormats];
+            for (int i = 0; i < numOfSymbols; i++)
             {
-                byte[] info = new UTF8Encoding(true).GetBytes(word + "\n");
-                fs.Write(info, 0, info.Length);
-                foreach (string symbol in symbols)
-                {
-                    foreach (string symbol2 in symbols.Skip(1).Concat(symbols.Take(1)))
-                    {
-                        for (int i = 0; i <= maxNumber; i++)
-                        {
-                            string formattedNumber = maxLength == null ? "" : i.ToString().PadLeft(maxLength ?? 0, '0');
-                            foreach (string format in combinations4)
-                            {
-                                info = new UTF8Encoding(true).GetBytes(string.Format(format, word, formattedNumber, symbol, symbol2) + "\n");
-                                fs.Write(info, 0, info.Length);
-                            }
-
-                            foreach (string date in dateFormats)
-                            {
-                                foreach (string format in combinations5)
-                                {
-                                    info = new UTF8Encoding(true).GetBytes(string.Format(format, word, formattedNumber, date, symbol, symbol2) + "\n");
-                                    fs.Write(info, 0, info.Length);
-                                }
-                            }
-                        }
-                    }
-                }
+                allLists.Add(symbols);
             }
-            */
-            fs.Close();
+            GenerateListsCombinationsAndPermutations(fullPath, allLists, maxChars);
+
 
             HashSet<string> uniqueLines = [];
 
             using (StreamReader reader = new(fullPath))
             {
+                using StreamWriter writer = new(fullPath);
+                List<string> buffer = [];
                 string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if (line.Length >= 4)
+                    buffer.Add(line);
+                    if (buffer.Count >= bufferLimit)
                     {
-                        uniqueLines.Add(line);
+                        writer.WriteLine(fullPath, buffer);
+                        buffer.Clear();
                     }
                 }
+                if (buffer.Count > 0)
+                {
+                    writer.WriteLine(fullPath, buffer);
+                }
                 reader.Close();
+                reader.Dispose();
             }
-            File.WriteAllLines(fullPath, uniqueLines);
-            uniqueLines = [];
+            //File.WriteAllLines(fullPath, uniqueLines);
+            uniqueLines.Clear();
         }
 
         public static List<string> GenerateCombinationsFormat(int length)
         {
-            List<string> result = new();
+            List<string> result = [];
             GenerateCombinationsFormatRecursive(length, "", result);
             return result;
         }
@@ -183,7 +159,7 @@ namespace PWDGenerator
 
         static List<string> GenerateSymbolCombinations(char[] symbols)
         {
-            List<string> results = new();
+            List<string> results = [];
             GenerateSymbolRecursive(symbols, "", symbols.Length, results);
             return results;
         }
@@ -205,24 +181,152 @@ namespace PWDGenerator
                 GenerateSymbolRecursive(symbols, current + symbol, length, results);
             }
         }
-
-        static void GenerateCombinationsBetweenListsRecursive(List<List<string>> lists, string current, int depth, FileStream fs, int maxChars)
+        /*
+            byte[] info = new UTF8Encoding(true).GetBytes(word + "\n");
+            fs.Write(info, 0, info.Length);
+         */
+        public static void GenerateListsCombinationsAndPermutations(string fullPath, List<List<string>> lists, int maxChars)
         {
-            if (depth == lists.Count)
+            string combinationsFile = Path.GetTempFileName();
+            string permutationsFile = fullPath;
+
+            // Generate combinations and write to temporary file
+            using (StreamWriter writer = new(combinationsFile))
             {
-                if (!string.IsNullOrEmpty(current))
-                {
-                    byte[] info = new UTF8Encoding(true).GetBytes(current + "\n");
-                    fs.Write(info, 0, info.Length);
-                }
-                //return;
+                GenerateListsCombinations(lists, writer, maxChars);
+                writer.Close();
+                writer.Dispose();
             }
 
-            foreach (var item in lists[depth])
+            // Read combinations, generate permutations, and write to another temporary file
+            using (StreamWriter writer = new(permutationsFile))
             {
-                // Recursively call for the next depth level
-                GenerateCombinationsBetweenListsRecursive(lists, current + item, depth + 1, fs, maxChars);
+                using StreamReader reader = new(combinationsFile);
+                string? line;
+                HashSet<string> uniquePermutations = [];
+                List<string> buffer = [];
+                while ((line = reader.ReadLine()) != null)
+                {
+                    buffer.Add(line);
+                    if (buffer.Count >= 5000)
+                    {
+                        ProcessBuffer(buffer, writer, maxChars);
+                        buffer.Clear();
+                    }
+                }
+                if (buffer.Count > 0)
+                {
+                    ProcessBuffer(buffer, writer, maxChars);
+                }
+                reader.Close();
+                reader.Dispose();
+                writer.Close();
+                writer.Dispose();
             }
+            
+            File.Delete(combinationsFile);
+        }
+
+        private static void ProcessBuffer(List<string> buffer, StreamWriter writer, int maxChars)
+        {
+            foreach (var line in buffer)
+            {
+                var combination = line.Split(',').ToList();
+                GenerateListsPermutations(combination, writer, maxChars);
+            }
+        }
+
+        public static void GenerateListsCombinations<T>(List<List<T>> lists, StreamWriter writer, int maxChars)
+        {
+            List<string> buffer = [];
+            if (lists == null || lists.Count == 0)
+            {
+                return;
+            }
+
+            // Generate combinations of varying lengths
+            for (int length = 1; length <= lists.Count; length++)
+            {
+                GenerateListsCombinationsRecursive(lists, length, writer, buffer, maxChars);
+            }
+        }
+
+        private static void GenerateListsCombinationsRecursive<T>(List<List<T>> lists, int length, StreamWriter writer, List<string> buffer, int maxChars, int start = 0, List<T>? current = null)
+        {
+            current ??= [];
+            if (current.Count == length)
+            {
+                string result = string.Join("", current);
+                if (result.Length >= 4 && result.Length <= maxChars)
+                {
+                    buffer.Add(string.Join(",", current));
+                    if (buffer.Count >= bufferLimit)
+                    {
+                        writer.WriteLine(string.Join("\n", buffer));
+                        buffer.Clear();
+                    }
+                }
+                return;
+            }
+
+            for (int i = start; i < lists.Count; i++)
+            {
+                foreach (var element in lists[i])
+                {
+                    current.Add(element);
+                    GenerateListsCombinationsRecursive(lists, length, writer, buffer, maxChars, i + 1, current);
+                    current.RemoveAt(current.Count - 1);
+                }
+            }
+
+            if (buffer.Count > 0)
+            {
+                writer.WriteLine(string.Join("\n", buffer));
+                buffer.Clear();
+            }
+        }
+
+        public static void GenerateListsPermutations<T>(List<T> list, StreamWriter writer, int maxChars)
+        {
+            List<string> buffer = [];
+            GenerateListsPermutationsRecursive(list, 0, writer, maxChars, buffer);
+        }
+
+        private static void GenerateListsPermutationsRecursive<T>(List<T> list, int k, StreamWriter writer, int maxChars, List<string> buffer)
+        {
+            if (k == list.Count)
+            {
+                string result = string.Join("", list);
+                if (result.Length >= 4 && result.Length <= maxChars)
+                {
+                    buffer.Add(result);
+                    if (buffer.Count >= bufferLimit)
+                    {
+                        writer.WriteLine(string.Join("\n", buffer));
+                        buffer.Clear();
+                    }
+                }
+            }
+            else
+            {
+                for (int i = k; i < list.Count; i++)
+                {
+                    Swap(list, k, i);
+                    GenerateListsPermutationsRecursive(list, k + 1, writer, maxChars, buffer);
+                    Swap(list, k, i); // backtrack
+                }
+            }
+
+            if (buffer.Count > 0)
+            {
+                writer.WriteLine(string.Join("\n", buffer));
+                buffer.Clear();
+            }
+        }
+
+        private static void Swap<T>(List<T> list, int i, int j)
+        {
+            (list[j], list[i]) = (list[i], list[j]);
         }
     }
 }
