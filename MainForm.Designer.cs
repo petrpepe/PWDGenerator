@@ -43,6 +43,8 @@
             enabledBDCheckBox = new CheckBox();
             label7 = new Label();
             symbolsBox = new TextBox();
+            maxCharLengthBox = new TextBox();
+            label8 = new Label();
             SuspendLayout();
             // 
             // generateBtn
@@ -92,7 +94,7 @@
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 10F);
-            label4.Location = new Point(16, 234);
+            label4.Location = new Point(16, 277);
             label4.Name = "label4";
             label4.Size = new Size(90, 19);
             label4.TabIndex = 4;
@@ -112,10 +114,10 @@
             // 
             savePathBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             savePathBox.Font = new Font("Segoe UI", 10F);
-            savePathBox.Location = new Point(16, 265);
+            savePathBox.Location = new Point(16, 309);
             savePathBox.Multiline = true;
             savePathBox.Name = "savePathBox";
-            savePathBox.Size = new Size(597, 29);
+            savePathBox.Size = new Size(597, 40);
             savePathBox.TabIndex = 8;
             // 
             // maxNumBox
@@ -157,7 +159,7 @@
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI", 10F);
-            label6.Location = new Point(16, 200);
+            label6.Location = new Point(16, 241);
             label6.Name = "label6";
             label6.Size = new Size(101, 19);
             label6.TabIndex = 12;
@@ -167,7 +169,7 @@
             // 
             fileNameBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             fileNameBox.Font = new Font("Segoe UI", 10F);
-            fileNameBox.Location = new Point(149, 197);
+            fileNameBox.Location = new Point(149, 238);
             fileNameBox.Name = "fileNameBox";
             fileNameBox.Size = new Size(335, 25);
             fileNameBox.TabIndex = 13;
@@ -204,11 +206,34 @@
             symbolsBox.Size = new Size(335, 25);
             symbolsBox.TabIndex = 16;
             // 
+            // maxCharLengthBox
+            // 
+            maxCharLengthBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            maxCharLengthBox.Font = new Font("Segoe UI", 10F);
+            maxCharLengthBox.Location = new Point(149, 199);
+            maxCharLengthBox.Name = "maxCharLengthBox";
+            maxCharLengthBox.PlaceholderText = "10";
+            maxCharLengthBox.Size = new Size(335, 25);
+            maxCharLengthBox.TabIndex = 17;
+            maxCharLengthBox.KeyPress += MaxNumBox_KeyPress;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI", 10F);
+            label8.Location = new Point(16, 202);
+            label8.Name = "label8";
+            label8.Size = new Size(106, 19);
+            label8.TabIndex = 18;
+            label8.Text = "Max délka hesla";
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(624, 311);
+            ClientSize = new Size(624, 361);
+            Controls.Add(label8);
+            Controls.Add(maxCharLengthBox);
             Controls.Add(symbolsBox);
             Controls.Add(label7);
             Controls.Add(enabledBDCheckBox);
@@ -224,7 +249,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(generateBtn);
-            MinimumSize = new Size(640, 350);
+            MinimumSize = new Size(640, 400);
             Name = "MainForm";
             Text = "Form1";
             Load += Form1_Load;
@@ -253,5 +278,7 @@
         private CheckBox enabledBDCheckBox;
         private Label label7;
         private TextBox symbolsBox;
+        private TextBox maxCharLengthBox;
+        private Label label8;
     }
 }

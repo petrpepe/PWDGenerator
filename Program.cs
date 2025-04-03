@@ -16,21 +16,41 @@ namespace PWDGenerator
             Application.Run(new MainForm());
         }
 
-        public static void GenerateCombinations(string baseWord, int maxNumber, string fullPath, DateTime? birthday, string symbolsString)
+        public static void GenerateCombinations(string keyword, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars)
         {
-            File.AppendAllText(fullPath, "");
-            int maxLength = maxNumber == 0 ? 0 : maxNumber.ToString().Length;
-            HashSet<string> generated = [];
-
-            List<string> symbols = symbolsString.Length == 0 ? [""] : symbolsString.ToList().ForEach(e => e.ToString());
-            List<string> wordVariations = baseWord == "" ? [""] : GenerateCapitalizationVariations(baseWord);
-            List<string> dateFormats = birthday.HasValue ? GenerateDateVariations(birthday.Value) : [];
+            File.WriteAllText(fullPath, "");
+            List<string> wordVariations = keyword == "" ? [""] : GenerateCapitalizationVariations(keyword).ToHashSet().ToList();
+            int? maxLength = maxNumber == 0 ? null : maxNumber.ToString().Length;
+            List<string> dateFormats = birthday.HasValue ? GenerateDateVariations(birthday.Value).ToHashSet().ToList() : [];
+            List<string> combinations3 = GenerateCombinationsFormat(2).ToHashSet().ToList();
+            List<string> combinations4 = GenerateCombinationsFormat(3).ToHashSet().ToList();
+            List<string> combinations5 = GenerateCombinationsFormat(4).ToHashSet().ToList();
+            List<string> symbols = GenerateSymbolCombinations(symbolsString.ToCharArray()).ToHashSet().ToList();
+            List<string> numberVariations = new();
             //int combinationsCount = (maxLength > 0 ? 1 : 0) + (birthday.HasValue ? 1 : 0) + (symbolsString.Length > 0 ? 1 : 0);
-            List<string> combinationsNum = GenerateCombinationsFormat(3);
-            List<string> combinationsDate = GenerateCombinationsFormat(4);
+
+
+            for (int i = 0; i <= maxNumber; i++)
+            {
+                if (maxLength == null)
+                {
+                    break;
+                }
+
+                numberVariations.Add(i.ToString());
+                if (i.ToString().Length != maxNumber.ToString().Length)
+                {
+                    numberVariations.Add(i.ToString().PadLeft(maxLength ?? 0, '0'));
+                }
+            }
 
             FileStream fs = File.Open(fullPath, FileMode.Append);
 
+            List<List<string>> allLists = new() { wordVariations, dateFormats, numberVariations, symbols };
+            //List<string> combinations = 
+            GenerateCombinationsBetweenListsRecursive(allLists, "", 0, fs, maxChars);
+
+            /*
             foreach (string word in wordVariations)
             {
                 byte[] info = new UTF8Encoding(true).GetBytes(word + "\n");
@@ -41,8 +61,8 @@ namespace PWDGenerator
                     {
                         for (int i = 0; i <= maxNumber; i++)
                         {
-                            string formattedNumber = i.ToString().PadLeft(maxLength, '0');
-                            foreach (string format in combinationsNum)
+                            string formattedNumber = maxLength == null ? "" : i.ToString().PadLeft(maxLength ?? 0, '0');
+                            foreach (string format in combinations4)
                             {
                                 info = new UTF8Encoding(true).GetBytes(string.Format(format, word, formattedNumber, symbol, symbol2) + "\n");
                                 fs.Write(info, 0, info.Length);
@@ -50,7 +70,7 @@ namespace PWDGenerator
 
                             foreach (string date in dateFormats)
                             {
-                                foreach (string format in combinationsDate)
+                                foreach (string format in combinations5)
                                 {
                                     info = new UTF8Encoding(true).GetBytes(string.Format(format, word, formattedNumber, date, symbol, symbol2) + "\n");
                                     fs.Write(info, 0, info.Length);
@@ -60,7 +80,7 @@ namespace PWDGenerator
                     }
                 }
             }
-
+            */
             fs.Close();
 
             HashSet<string> uniqueLines = [];
@@ -81,32 +101,32 @@ namespace PWDGenerator
             uniqueLines = [];
         }
 
-        public static List<string> GenerateCombinationsFormat(int n)
+        public static List<string> GenerateCombinationsFormat(int length)
         {
             List<string> result = new();
-            GenerateCombinationsFormatRecursive(n, "", result);
+            GenerateCombinationsFormatRecursive(length, "", result);
             return result;
         }
 
-        private static void GenerateCombinationsFormatRecursive(int n, string current, List<string> result)
+        private static void GenerateCombinationsFormatRecursive(int length, string current, List<string> result)
         {
             if (current.Length > 0)
             {
                 result.Add(current);
             }
 
-            if (current.Replace("{","").Replace("}","").Length == n+1)
+            if (current.Replace("{", "").Replace("}", "").Length == length + 1)
             {
                 return;
             }
 
-            for (int i = 0; i <= n; i++)
+            for (int i = 0; i <= length; i++)
             {
                 if (current.Contains("{" + i + "}"))
                 {
                     continue;
                 }
-                GenerateCombinationsFormatRecursive(n, current + "{" + i + "}", result);
+                GenerateCombinationsFormatRecursive(length, current + "{" + i + "}", result);
             }
         }
 
@@ -159,6 +179,50 @@ namespace PWDGenerator
             dates.Add($"{shortYear}{day}{month}");
 
             return dates;
+        }
+
+        static List<string> GenerateSymbolCombinations(char[] symbols)
+        {
+            List<string> results = new();
+            GenerateSymbolRecursive(symbols, "", symbols.Length, results);
+            return results;
+        }
+
+        static void GenerateSymbolRecursive(char[] symbols, string current, int length, List<string> results)
+        {
+            if (current.Length > 0)
+            {
+                results.Add(current);
+            }
+
+            if (current.Length == 1)
+            {
+                return;
+            }
+
+            foreach (char symbol in symbols)
+            {
+                GenerateSymbolRecursive(symbols, current + symbol, length, results);
+            }
+        }
+
+        static void GenerateCombinationsBetweenListsRecursive(List<List<string>> lists, string current, int depth, FileStream fs, int maxChars)
+        {
+            if (depth == lists.Count)
+            {
+                if (!string.IsNullOrEmpty(current))
+                {
+                    byte[] info = new UTF8Encoding(true).GetBytes(current + "\n");
+                    fs.Write(info, 0, info.Length);
+                }
+                //return;
+            }
+
+            foreach (var item in lists[depth])
+            {
+                // Recursively call for the next depth level
+                GenerateCombinationsBetweenListsRecursive(lists, current + item, depth + 1, fs, maxChars);
+            }
         }
     }
 }
