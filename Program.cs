@@ -15,15 +15,23 @@ namespace PWDGenerator
             Application.Run(new MainForm());
         }
 
-        public static void GenerateCombinations(string keyword, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols)
+        public static void GenerateCombinations(string keywords, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols)
         {
             File.WriteAllText(fullPath, "");
-            List<string> wordVariations = keyword == "" ? [""] : [.. GenerateCapitalizationVariations(keyword)];
+            List<List<string>> words = [];
             int? maxLength = maxNumber == 0 ? null : maxNumber.ToString().Length;
             List<string> dateFormats = birthday.HasValue ? [.. GenerateDateVariations(birthday.Value)] : [];
             List<string> symbols = [.. GenerateSymbolCombinations(symbolsString.ToCharArray())];
             List<string> numberVariations = [];
             //int combinationsCount = (maxLength > 0 ? 1 : 0) + (birthday.HasValue ? 1 : 0) + (symbolsString.Length > 0 ? 1 : 0);
+            List<string> wordsList = [];
+            if (keywords.Contains(',')) wordsList = [.. keywords.Trim().ToLower().Split(',')];
+            else if (keywords.Contains(';') && !keywords.Contains(',')) wordsList = [.. keywords.Trim().ToLower().Split(';')];
+            else if (keywords.Contains(' ') && !keywords.Contains(',') && !keywords.Contains(';')) wordsList = [.. keywords.Trim().ToLower().Split(' ')];
+            foreach (string word in wordsList)
+            {
+                words.Add([.. GenerateCapitalizationVariations(word)]);
+            }
 
             for (int i = 0; i <= maxNumber; i++)
             {
@@ -39,7 +47,7 @@ namespace PWDGenerator
                 }
             }
 
-            List<List<string>> allLists = [wordVariations, numberVariations, dateFormats];
+            List<List<string>> allLists = [.. words, numberVariations, dateFormats];
             for (int i = 0; i < numOfSymbols; i++)
             {
                 allLists.Add(symbols);
@@ -104,31 +112,26 @@ namespace PWDGenerator
             }
         }
 
-        static List<string> GenerateCapitalizationVariations(string words)
+        static List<string> GenerateCapitalizationVariations(string word)
         {
-            List<string> wordsList = [];
-            if (words.Contains(',')) wordsList = [.. words.Trim().ToLower().Split(',')];
-            else if (words.Contains(';') && !words.Contains(',')) wordsList = [.. words.Trim().ToLower().Split(';')];
-            else if (words.Contains(' ') && !words.Contains(',') && !words.Contains(';')) wordsList = [.. words.Trim().ToLower().Split(' ')];
+            word = word.ToLower();
+
             List<string> variations = [];
+            int length = word.Length;
+            int totalVariations = 1 << length; // 2^length possible variations
 
-            foreach (string word in wordsList)
+            for (int i = 0; i < totalVariations; i++)
             {
-                int length = word.Trim().Length;
-                int totalVariations = 1 << length; // 2^length possible variations
-
-                for (int i = 0; i < totalVariations; i++)
+                char[] chars = word.ToCharArray();
+                for (int j = 0; j < length; j++)
                 {
-                    char[] chars = word.Trim().ToCharArray();
-                    for (int j = 0; j < length; j++)
+                    if ((i & (1 << j)) != 0) // Bitwise check to toggle capitalization
+
                     {
-                        if ((i & (1 << j)) != 0) // Bitwise check to toggle capitalization
-                        {
-                            chars[j] = char.ToUpper(chars[j]);
-                        }
+                        chars[j] = char.ToUpper(chars[j]);
                     }
-                    variations.Add(new string(chars));
                 }
+                variations.Add(new string(chars));
             }
 
             return variations;
