@@ -1,11 +1,8 @@
-using System.Collections.Generic;
-using System.Text;
-
 namespace PWDGenerator
 {
     internal static class Program
     {
-        private static int bufferLimit = 50000;
+        private static readonly int bufferLimit = 50000;
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -47,34 +44,35 @@ namespace PWDGenerator
             {
                 allLists.Add(symbols);
             }
-            GenerateListsCombinationsAndPermutations(fullPath, allLists, maxChars);
+            string permutationsFile = Path.GetTempFileName();
+            GenerateListsCombinationsAndPermutations(allLists, permutationsFile, maxChars);
 
+            FileStream fs = new(fullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
 
-            HashSet<string> uniqueLines = [];
-
-            using (StreamReader reader = new(fullPath))
+            using (StreamReader reader = new(permutationsFile))
+            using (StreamWriter writer = new(fs))
             {
-                using StreamWriter writer = new(fullPath);
-                List<string> buffer = [];
+                HashSet<string> uniqueLines = [];
+                int cycle = 1;
                 string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
-                    buffer.Add(line);
-                    if (buffer.Count >= bufferLimit)
+                    uniqueLines.Add(line);
+                    /*if (uniqueLines.Count == bufferLimit * cycle)
                     {
-                        writer.WriteLine(fullPath, buffer);
-                        buffer.Clear();
-                    }
+                        writer.WriteLine(string.Join("\n", uniqueLines.ToList().GetRange(bufferLimit * (cycle - 1), bufferLimit)));
+                        cycle++;
+                    }*/
                 }
-                if (buffer.Count > 0)
+                writer.WriteLine(string.Join("\n", uniqueLines));
+                /*if (uniqueLines.Count >= bufferLimit * cycle)
                 {
-                    writer.WriteLine(fullPath, buffer);
-                }
-                reader.Close();
-                reader.Dispose();
+                    writer.WriteLine(string.Join("\n", uniqueLines.ToList().GetRange(bufferLimit * cycle, uniqueLines.Count - (bufferLimit * (cycle - 1)))));
+                }*/
             }
-            //File.WriteAllLines(fullPath, uniqueLines);
-            uniqueLines.Clear();
+
+            fs?.Dispose();
+            File.Delete(permutationsFile);
         }
 
         public static List<string> GenerateCombinationsFormat(int length)
@@ -106,24 +104,31 @@ namespace PWDGenerator
             }
         }
 
-        static List<string> GenerateCapitalizationVariations(string word)
+        static List<string> GenerateCapitalizationVariations(string words)
         {
-            word = word.ToLower();
+            List<string> wordsList = [];
+            if (words.Contains(',')) wordsList = [.. words.Trim().ToLower().Split(',')];
+            else if (words.Contains(';') && !words.Contains(',')) wordsList = [.. words.Trim().ToLower().Split(';')];
+            else if (words.Contains(' ') && !words.Contains(',') && !words.Contains(';')) wordsList = [.. words.Trim().ToLower().Split(' ')];
             List<string> variations = [];
-            int length = word.Length;
-            int totalVariations = 1 << length; // 2^length possible variations
 
-            for (int i = 0; i < totalVariations; i++)
+            foreach (string word in wordsList)
             {
-                char[] chars = word.ToCharArray();
-                for (int j = 0; j < length; j++)
+                int length = word.Trim().Length;
+                int totalVariations = 1 << length; // 2^length possible variations
+
+                for (int i = 0; i < totalVariations; i++)
                 {
-                    if ((i & (1 << j)) != 0) // Bitwise check to toggle capitalization
+                    char[] chars = word.Trim().ToCharArray();
+                    for (int j = 0; j < length; j++)
                     {
-                        chars[j] = char.ToUpper(chars[j]);
+                        if ((i & (1 << j)) != 0) // Bitwise check to toggle capitalization
+                        {
+                            chars[j] = char.ToUpper(chars[j]);
+                        }
                     }
+                    variations.Add(new string(chars));
                 }
-                variations.Add(new string(chars));
             }
 
             return variations;
@@ -185,17 +190,14 @@ namespace PWDGenerator
             byte[] info = new UTF8Encoding(true).GetBytes(word + "\n");
             fs.Write(info, 0, info.Length);
          */
-        public static void GenerateListsCombinationsAndPermutations(string fullPath, List<List<string>> lists, int maxChars)
+        public static void GenerateListsCombinationsAndPermutations(List<List<string>> lists, string permutationsFile, int maxChars)
         {
             string combinationsFile = Path.GetTempFileName();
-            string permutationsFile = fullPath;
 
             // Generate combinations and write to temporary file
             using (StreamWriter writer = new(combinationsFile))
             {
                 GenerateListsCombinations(lists, writer, maxChars);
-                writer.Close();
-                writer.Dispose();
             }
 
             // Read combinations, generate permutations, and write to another temporary file
@@ -218,12 +220,8 @@ namespace PWDGenerator
                 {
                     ProcessBuffer(buffer, writer, maxChars);
                 }
-                reader.Close();
-                reader.Dispose();
-                writer.Close();
-                writer.Dispose();
             }
-            
+
             File.Delete(combinationsFile);
         }
 

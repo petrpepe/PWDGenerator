@@ -16,37 +16,47 @@ namespace PWDGenerator
             symbolsBox.Text = "";
             fileNameBox.Text = "generatedPasswords.txt";
             savePathBox.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\";
-            maxCharLengthBox.Text = "10";
+            //maxCharLengthBox.Text = "10";
+        }
+
+        private void GenerateBtn_Click(object sender, EventArgs e)
+        {
+            Cursor.Current = Cursors.WaitCursor;
+            /*try
+            {*/
+            if (keyWordBox.Text == "" && maxNumBox.Text == "") return;
+            DateTime? bdValue = null;
+            if (enabledBDCheckBox.Checked) bdValue = birthdayPicker.Value;
+            string savePath = savePathBox.Text.EndsWith('\\') ? savePathBox.Text : savePathBox.Text + "\\";
+            Program.GenerateCombinations(keyWordBox.Text, string.IsNullOrEmpty(maxNumBox.Text) ? 0 : int.Parse(maxNumBox.Text), savePath + fileNameBox.Text,
+                bdValue, symbolsBox.Text, string.IsNullOrEmpty(maxCharLengthBox.Text) ? 10 : int.Parse(maxCharLengthBox.Text), (int)numOfSymbolsNBox.Value);
+            MessageBox.Show("Vygenerová a uloženo do: " + savePathBox.Text + fileNameBox.Text, "Úspìch");
+            /*}
+            catch (Exception ex)
+            {
+                MessageBox.Show("Chyba:\n" + ex, "CHYBA");
+            }*/
+            Cursor.Current = Cursors.Default;
         }
 
         private void MaxNumBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             char numsOnly = e.KeyChar;
-
+            // 8 = backspace
             if (!char.IsDigit(numsOnly) && numsOnly != 8)
             {
                 e.Handled = true;
             }
         }
 
-        private void GenerateBtn_Click(object sender, EventArgs e)
+        private void MaxCharLengthBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            Cursor.Current = Cursors.WaitCursor;
-            try
+            char numsOnly = e.KeyChar;
+            // 8 = backspace
+            if (!char.IsDigit(numsOnly) && numsOnly != 8)
             {
-                if (keyWordBox.Text == "" && maxNumBox.Text == "") return;
-                DateTime? bdValue = null;
-                if (enabledBDCheckBox.Checked) bdValue = birthdayPicker.Value;
-                string savePath = savePathBox.Text.EndsWith('\\') ? savePathBox.Text : savePathBox.Text + "\\";
-                Program.GenerateCombinations(keyWordBox.Text, string.IsNullOrEmpty(maxNumBox.Text) ? 0 : int.Parse(maxNumBox.Text), savePath + fileNameBox.Text,
-                    bdValue, symbolsBox.Text,  string.IsNullOrEmpty(maxCharLengthBox.Text) ? 10 : int.Parse(maxCharLengthBox.Text), (int)numOfSymbolsNBox.Value);
-                MessageBox.Show("Vygenerová a uloženo do: " + savePathBox.Text + fileNameBox.Text);
+                e.Handled = true;
             }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Chyba:\n" + ex);
-            }
-            Cursor.Current = Cursors.Default;
         }
 
         private void EnabledBDCheckBox_CheckedChanged(object sender, EventArgs e)

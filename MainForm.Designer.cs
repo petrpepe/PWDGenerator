@@ -57,7 +57,7 @@
             generateBtn.Location = new Point(490, 36);
             generateBtn.Name = "generateBtn";
             generateBtn.Size = new Size(123, 260);
-            generateBtn.TabIndex = 0;
+            generateBtn.TabIndex = 8;
             generateBtn.Text = "Generuj";
             generateBtn.UseVisualStyleBackColor = true;
             generateBtn.Click += GenerateBtn_Click;
@@ -108,9 +108,9 @@
             keyWordBox.Font = new Font("Segoe UI", 10F);
             keyWordBox.Location = new Point(149, 39);
             keyWordBox.Name = "keyWordBox";
-            keyWordBox.PlaceholderText = "Heslo";
+            keyWordBox.PlaceholderText = "Klíčové slovo";
             keyWordBox.Size = new Size(335, 25);
-            keyWordBox.TabIndex = 5;
+            keyWordBox.TabIndex = 1;
             // 
             // savePathBox
             // 
@@ -119,8 +119,9 @@
             savePathBox.Location = new Point(16, 309);
             savePathBox.Multiline = true;
             savePathBox.Name = "savePathBox";
+            savePathBox.PlaceholderText = "C:\\...";
             savePathBox.Size = new Size(597, 40);
-            savePathBox.TabIndex = 8;
+            savePathBox.TabIndex = 10;
             // 
             // maxNumBox
             // 
@@ -130,7 +131,7 @@
             maxNumBox.Name = "maxNumBox";
             maxNumBox.PlaceholderText = "99";
             maxNumBox.Size = new Size(335, 25);
-            maxNumBox.TabIndex = 9;
+            maxNumBox.TabIndex = 2;
             maxNumBox.KeyPress += MaxNumBox_KeyPress;
             // 
             // birthdayPicker
@@ -143,14 +144,14 @@
             birthdayPicker.MinDate = new DateTime(1900, 1, 1, 0, 0, 0, 0);
             birthdayPicker.Name = "birthdayPicker";
             birthdayPicker.Size = new Size(264, 25);
-            birthdayPicker.TabIndex = 10;
+            birthdayPicker.TabIndex = 4;
             // 
             // label5
             // 
             label5.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             label5.AutoSize = true;
             label5.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            label5.Location = new Point(202, 8);
+            label5.Location = new Point(177, 9);
             label5.Name = "label5";
             label5.Size = new Size(274, 25);
             label5.TabIndex = 11;
@@ -173,8 +174,9 @@
             fileNameBox.Font = new Font("Segoe UI", 10F);
             fileNameBox.Location = new Point(149, 238);
             fileNameBox.Name = "fileNameBox";
+            fileNameBox.PlaceholderText = "*.txt / *.csv ...";
             fileNameBox.Size = new Size(335, 25);
-            fileNameBox.TabIndex = 13;
+            fileNameBox.TabIndex = 9;
             // 
             // enabledBDCheckBox
             // 
@@ -183,7 +185,7 @@
             enabledBDCheckBox.Location = new Point(149, 123);
             enabledBDCheckBox.Name = "enabledBDCheckBox";
             enabledBDCheckBox.Size = new Size(65, 23);
-            enabledBDCheckBox.TabIndex = 14;
+            enabledBDCheckBox.TabIndex = 3;
             enabledBDCheckBox.Text = "Použít";
             enabledBDCheckBox.UseVisualStyleBackColor = true;
             enabledBDCheckBox.CheckedChanged += EnabledBDCheckBox_CheckedChanged;
@@ -207,7 +209,7 @@
             symbolsBox.Name = "symbolsBox";
             symbolsBox.PlaceholderText = "!,.* (neoddělovat, napsat za sebou)";
             symbolsBox.Size = new Size(264, 25);
-            symbolsBox.TabIndex = 16;
+            symbolsBox.TabIndex = 6;
             // 
             // maxCharLengthBox
             // 
@@ -217,8 +219,8 @@
             maxCharLengthBox.Name = "maxCharLengthBox";
             maxCharLengthBox.PlaceholderText = "10";
             maxCharLengthBox.Size = new Size(335, 25);
-            maxCharLengthBox.TabIndex = 17;
-            maxCharLengthBox.KeyPress += MaxNumBox_KeyPress;
+            maxCharLengthBox.TabIndex = 7;
+            maxCharLengthBox.KeyPress += MaxCharLengthBox_KeyPress;
             // 
             // label8
             // 
@@ -235,8 +237,10 @@
             numOfSymbolsNBox.Location = new Point(149, 161);
             numOfSymbolsNBox.Name = "numOfSymbolsNBox";
             numOfSymbolsNBox.Size = new Size(65, 23);
-            numOfSymbolsNBox.TabIndex = 19;
+            numOfSymbolsNBox.TabIndex = 5;
             numOfSymbolsNBox.ValueChanged += NumOfSymbolsNBox_ValueChanged;
+            numOfSymbolsNBox.Click += NumOfSymbolsNBox_ValueChanged;
+            numOfSymbolsNBox.KeyUp += NumOfSymbolsNBox_ValueChanged;
             // 
             // MainForm
             // 
@@ -263,16 +267,11 @@
             Controls.Add(generateBtn);
             MinimumSize = new Size(640, 400);
             Name = "MainForm";
-            Text = "Form1";
+            Text = "Vygeneruj kombinace hesel a ulož do souboru";
             Load += Form1_Load;
             ((System.ComponentModel.ISupportInitialize)numOfSymbolsNBox).EndInit();
             ResumeLayout(false);
             PerformLayout();
-        }
-
-        private void BirthdayPicker_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            throw new NotImplementedException();
         }
         #endregion
 
