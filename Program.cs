@@ -1,8 +1,12 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+
 namespace PWDGenerator
 {
     internal static class Program
     {
-        private static readonly int bufferLimit = 50000;
+        private static readonly int bufferLimit = 500000;
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
@@ -15,27 +19,25 @@ namespace PWDGenerator
             Application.Run(new MainForm());
         }
 
-        public static void GenerateCombinations(string keywords, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols)
+        public static void GeneratePWDCombinations(string keywords, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols)
         {
             File.WriteAllText(fullPath, "");
             List<List<string>> words = [];
-            int? maxLength = maxNumber == 0 ? null : maxNumber.ToString().Length;
-            List<string> dateFormats = birthday.HasValue ? [.. GenerateDateVariations(birthday.Value)] : [];
-            List<string> symbols = [.. GenerateSymbolCombinations(symbolsString.ToCharArray())];
+            int? maxNumLength = maxNumber <= 0 ? null : maxNumber.ToString().Length;
+            List<string> dateFormats = birthday.HasValue ? GenerateDateVariations(birthday.Value) : [];
+            //dateFormats.Sort((a, b) => a.Length.CompareTo(b.Length));
+            List<string> symbols = [.. symbolsString.ToCharArray().Select(c => c.ToString())];
             List<string> numberVariations = [];
-            //int combinationsCount = (maxLength > 0 ? 1 : 0) + (birthday.HasValue ? 1 : 0) + (symbolsString.Length > 0 ? 1 : 0);
-            List<string> wordsList = [];
-            if (keywords.Contains(',')) wordsList = [.. keywords.Trim().ToLower().Split(',')];
-            else if (keywords.Contains(';') && !keywords.Contains(',')) wordsList = [.. keywords.Trim().ToLower().Split(';')];
-            else if (keywords.Contains(' ') && !keywords.Contains(',') && !keywords.Contains(';')) wordsList = [.. keywords.Trim().ToLower().Split(' ')];
+            List<string> wordsList = [.. keywords.Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries).Select(w => w.Trim().ToLower())];
+
             foreach (string word in wordsList)
             {
-                words.Add([.. GenerateCapitalizationVariations(word)]);
+                words.Add([.. GenerateCapitalizationVariations(word, maxChars)]);
             }
 
             for (int i = 0; i <= maxNumber; i++)
             {
-                if (maxLength == null)
+                if (maxNumLength == null)
                 {
                     break;
                 }
@@ -43,43 +45,60 @@ namespace PWDGenerator
                 numberVariations.Add(i.ToString());
                 if (i.ToString().Length != maxNumber.ToString().Length)
                 {
-                    numberVariations.Add(i.ToString().PadLeft(maxLength ?? 0, '0'));
+                    numberVariations.Add(i.ToString().PadLeft(maxNumLength ?? 0, '0'));
                 }
             }
+
+            //numberVariations.Sort((a,b) => a.Length.CompareTo(b.Length));
 
             List<List<string>> allLists = [.. words, numberVariations, dateFormats];
             for (int i = 0; i < numOfSymbols; i++)
             {
                 allLists.Add(symbols);
             }
-            string permutationsFile = Path.GetTempFileName();
-            GenerateListsCombinationsAndPermutations(allLists, permutationsFile, maxChars);
+            allLists.RemoveAll(l => l.Count == 0);
 
-            FileStream fs = new(fullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
+            string permutationsFile = Path.GetTempFileName();
+
+            string combinationsFile = Path.GetTempFileName();
+
+            HashSet<string> buffer = new(bufferLimit + 10);
+            GenerateAllCombinations(allLists, maxChars, combinationsFile, buffer);
+
+            using (var writer = new StreamWriter(permutationsFile))
+            using (var reader = new StreamReader(combinationsFile))
+            {
+                string? line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    PermuteRecursive([.. line.Split(",")], 0, maxChars, writer, buffer);
+                }
+                
+                // Write remaining buffer
+                if (buffer.Count > 0) FlushBuffer(writer, buffer);
+            }
+
+            buffer.Clear();
+
+            CopyUniqueLines(permutationsFile, fullPath);
+
+            /*FileStream fs = new(fullPath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.ReadWrite);
 
             using (StreamReader reader = new(permutationsFile))
             using (StreamWriter writer = new(fs))
             {
                 HashSet<string> uniqueLines = [];
-                int cycle = 1;
                 string? line;
                 while ((line = reader.ReadLine()) != null)
                 {
                     uniqueLines.Add(line);
-                    /*if (uniqueLines.Count == bufferLimit * cycle)
-                    {
-                        writer.WriteLine(string.Join("\n", uniqueLines.ToList().GetRange(bufferLimit * (cycle - 1), bufferLimit)));
-                        cycle++;
-                    }*/
                 }
                 writer.WriteLine(string.Join("\n", uniqueLines));
-                /*if (uniqueLines.Count >= bufferLimit * cycle)
-                {
-                    writer.WriteLine(string.Join("\n", uniqueLines.ToList().GetRange(bufferLimit * cycle, uniqueLines.Count - (bufferLimit * (cycle - 1)))));
-                }*/
+                uniqueLines.Clear();
             }
 
-            fs?.Dispose();
+            fs?.Dispose();*/
+            File.Delete(combinationsFile);
             File.Delete(permutationsFile);
         }
 
@@ -112,10 +131,10 @@ namespace PWDGenerator
             }
         }
 
-        static List<string> GenerateCapitalizationVariations(string word)
+        static List<string> GenerateCapitalizationVariations(string word, int maxChars)
         {
+            if (word.Length > maxChars) return [];
             word = word.ToLower();
-
             List<string> variations = [];
             int length = word.Length;
             int totalVariations = 1 << length; // 2^length possible variations
@@ -126,7 +145,6 @@ namespace PWDGenerator
                 for (int j = 0; j < length; j++)
                 {
                     if ((i & (1 << j)) != 0) // Bitwise check to toggle capitalization
-
                     {
                         chars[j] = char.ToUpper(chars[j]);
                     }
@@ -146,8 +164,8 @@ namespace PWDGenerator
             string month = dateTime.ToString("MM"); // "03"
             string day = dateTime.ToString("dd"); // "31"
 
-            dates.Add(year);
-            dates.Add(shortYear);
+            dates.Add($"{year}");
+            dates.Add($"{shortYear}");
             dates.Add($"{day}");
             dates.Add($"{month}");
             dates.Add($"{year}");
@@ -165,169 +183,123 @@ namespace PWDGenerator
             return dates;
         }
 
-        static List<string> GenerateSymbolCombinations(char[] symbols)
+        static void GenerateAllCombinations(List<List<string>> listOfLists, int maxChars, string combinationsFile, HashSet<string> buffer)
         {
-            List<string> results = [];
-            GenerateSymbolRecursive(symbols, "", symbols.Length, results);
-            return results;
+            using var writer = new StreamWriter(combinationsFile);
+            GenerateCombinationsRecursive(listOfLists, 0, [], maxChars, writer, buffer);
+            if (buffer.Count > 0) FlushBuffer(writer, buffer);
         }
 
-        static void GenerateSymbolRecursive(char[] symbols, string current, int length, List<string> results)
+        static void GenerateCombinationsRecursive(List<List<string>> lists, int depth, List<string> current, int maxLength, StreamWriter writer, HashSet<string> buffer)
         {
-            if (current.Length > 0)
+            if (GetTotalLength(current) >= 4 && GetTotalLength(current) <= maxLength)
             {
-                results.Add(current);
+                buffer.Add(string.Join(",", current));
+                if (buffer.Count >= bufferLimit)
+                    FlushBuffer(writer, buffer);
             }
 
-            if (current.Length == 1)
+            if (depth > lists.Count)
             {
                 return;
             }
 
-            foreach (char symbol in symbols)
+            for (int i = depth; i < lists.Count; i++)
             {
-                GenerateSymbolRecursive(symbols, current + symbol, length, results);
-            }
-        }
-        /*
-            byte[] info = new UTF8Encoding(true).GetBytes(word + "\n");
-            fs.Write(info, 0, info.Length);
-         */
-        public static void GenerateListsCombinationsAndPermutations(List<List<string>> lists, string permutationsFile, int maxChars)
-        {
-            string combinationsFile = Path.GetTempFileName();
-
-            // Generate combinations and write to temporary file
-            using (StreamWriter writer = new(combinationsFile))
-            {
-                GenerateListsCombinations(lists, writer, maxChars);
-            }
-
-            // Read combinations, generate permutations, and write to another temporary file
-            using (StreamWriter writer = new(permutationsFile))
-            {
-                using StreamReader reader = new(combinationsFile);
-                string? line;
-                HashSet<string> uniquePermutations = [];
-                List<string> buffer = [];
-                while ((line = reader.ReadLine()) != null)
+                foreach (string item in lists[i])
                 {
-                    buffer.Add(line);
-                    if (buffer.Count >= 5000)
+                    current.Add(item);
+                    if (GetTotalLength(current) >= 4 && GetTotalLength(current) <= maxLength)
                     {
-                        ProcessBuffer(buffer, writer, maxChars);
-                        buffer.Clear();
+                        GenerateCombinationsRecursive(lists, i + 1, current, maxLength, writer, buffer);
                     }
-                }
-                if (buffer.Count > 0)
-                {
-                    ProcessBuffer(buffer, writer, maxChars);
-                }
-            }
-
-            File.Delete(combinationsFile);
-        }
-
-        private static void ProcessBuffer(List<string> buffer, StreamWriter writer, int maxChars)
-        {
-            foreach (var line in buffer)
-            {
-                var combination = line.Split(',').ToList();
-                GenerateListsPermutations(combination, writer, maxChars);
-            }
-        }
-
-        public static void GenerateListsCombinations<T>(List<List<T>> lists, StreamWriter writer, int maxChars)
-        {
-            List<string> buffer = [];
-            if (lists == null || lists.Count == 0)
-            {
-                return;
-            }
-
-            // Generate combinations of varying lengths
-            for (int length = 1; length <= lists.Count; length++)
-            {
-                GenerateListsCombinationsRecursive(lists, length, writer, buffer, maxChars);
-            }
-        }
-
-        private static void GenerateListsCombinationsRecursive<T>(List<List<T>> lists, int length, StreamWriter writer, List<string> buffer, int maxChars, int start = 0, List<T>? current = null)
-        {
-            current ??= [];
-            if (current.Count == length)
-            {
-                string result = string.Join("", current);
-                if (result.Length >= 4 && result.Length <= maxChars)
-                {
-                    buffer.Add(string.Join(",", current));
-                    if (buffer.Count >= bufferLimit)
-                    {
-                        writer.WriteLine(string.Join("\n", buffer));
-                        buffer.Clear();
-                    }
-                }
-                return;
-            }
-
-            for (int i = start; i < lists.Count; i++)
-            {
-                foreach (var element in lists[i])
-                {
-                    current.Add(element);
-                    GenerateListsCombinationsRecursive(lists, length, writer, buffer, maxChars, i + 1, current);
                     current.RemoveAt(current.Count - 1);
                 }
             }
+        }
 
-            if (buffer.Count > 0)
+        static void PermuteRecursive(List<string> list, int start, int maxLength, StreamWriter writer, HashSet<string> buffer)
+        {
+            if (start >= list.Count)
             {
-                writer.WriteLine(string.Join("\n", buffer));
-                buffer.Clear();
+                if (GetTotalLength(list) <= maxLength)
+                {
+                    buffer.Add(string.Join("", list));
+                    if (buffer.Count >= bufferLimit)
+                        FlushBuffer(writer, buffer);
+                }
+                return;
+            }
+
+            for (int i = start; i < list.Count; i++)
+            {
+                Swap(list, start, i);
+                PermuteRecursive(list, start + 1, maxLength, writer, buffer);
+                Swap(list, start, i);
             }
         }
 
-        public static void GenerateListsPermutations<T>(List<T> list, StreamWriter writer, int maxChars)
+        static void Swap(List<string> list, int i, int j)
         {
-            List<string> buffer = [];
-            GenerateListsPermutationsRecursive(list, 0, writer, maxChars, buffer);
+            string temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
         }
 
-        private static void GenerateListsPermutationsRecursive<T>(List<T> list, int k, StreamWriter writer, int maxChars, List<string> buffer)
+        static int GetTotalLength(List<string> list)
         {
-            if (k == list.Count)
+            return list.Sum(s => s.Length);
+        }
+
+        static void FlushBuffer(StreamWriter writer, HashSet<string> buffer)
+        {
+            foreach (var line in buffer)
+                writer.WriteLine(line);
+            buffer.Clear();
+        }
+
+        static void CopyUniqueLines(string inputFilePath, string outputFilePath)
+        {
+            string tempFilePath = Path.GetTempFileName();
+            HashSet<string> uniqueLines = [];
+            int bufferCount = 0;
+
+            using (var reader = new StreamReader(inputFilePath))
+            using (var tempWriter = new StreamWriter(tempFilePath))
             {
-                string result = string.Join("", list);
-                if (result.Length >= 4 && result.Length <= maxChars)
+                string? line;
+                while ((line = reader.ReadLine()) != null)
                 {
-                    buffer.Add(result);
-                    if (buffer.Count >= bufferLimit)
+                    if (uniqueLines.Add(line))
                     {
-                        writer.WriteLine(string.Join("\n", buffer));
-                        buffer.Clear();
+                        tempWriter.WriteLine(line);
+                        bufferCount++;
+
+                        if (bufferCount >= bufferLimit)
+                        {
+                            uniqueLines.Clear();
+                            bufferCount = 0;
+                        }
                     }
                 }
             }
-            else
+
+            // Write unique lines from the temporary file to the final output file
+            using (var tempReader = new StreamReader(tempFilePath))
+            using (var writer = new StreamWriter(outputFilePath))
             {
-                for (int i = k; i < list.Count; i++)
+                uniqueLines.Clear();
+                string? line;
+                while ((line = tempReader.ReadLine()) != null)
                 {
-                    Swap(list, k, i);
-                    GenerateListsPermutationsRecursive(list, k + 1, writer, maxChars, buffer);
-                    Swap(list, k, i); // backtrack
+                    if (uniqueLines.Add(line))
+                    {
+                        writer.WriteLine(line);
+                    }
                 }
             }
 
-            if (buffer.Count > 0)
-            {
-                writer.WriteLine(string.Join("\n", buffer));
-                buffer.Clear();
-            }
-        }
-
-        private static void Swap<T>(List<T> list, int i, int j)
-        {
-            (list[j], list[i]) = (list[i], list[j]);
+            File.Delete(tempFilePath);
         }
     }
 }

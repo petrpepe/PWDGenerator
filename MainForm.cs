@@ -16,7 +16,7 @@ namespace PWDGenerator
             symbolsBox.Text = "";
             fileNameBox.Text = "generatedPasswords.txt";
             savePathBox.Text = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\";
-            //maxCharLengthBox.Text = "10";
+            maxCharLengthBox.Text = "10";
         }
 
         private void GenerateBtn_Click(object sender, EventArgs e)
@@ -28,7 +28,7 @@ namespace PWDGenerator
             DateTime? bdValue = null;
             if (enabledBDCheckBox.Checked) bdValue = birthdayPicker.Value;
             string savePath = savePathBox.Text.EndsWith('\\') ? savePathBox.Text : savePathBox.Text + "\\";
-            Program.GenerateCombinations(keyWordBox.Text, string.IsNullOrEmpty(maxNumBox.Text) ? 0 : int.Parse(maxNumBox.Text), savePath + fileNameBox.Text,
+            Program.GeneratePWDCombinations(keyWordBox.Text, string.IsNullOrEmpty(maxNumBox.Text) ? 0 : int.Parse(maxNumBox.Text), savePath + fileNameBox.Text,
                 bdValue, symbolsBox.Text, string.IsNullOrEmpty(maxCharLengthBox.Text) ? 10 : int.Parse(maxCharLengthBox.Text), (int)numOfSymbolsNBox.Value);
             MessageBox.Show("Vygenerová a uloženo do: " + savePathBox.Text + fileNameBox.Text, "Úspìch");
             /*}
