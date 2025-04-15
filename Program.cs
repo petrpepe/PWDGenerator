@@ -19,7 +19,7 @@ namespace PWDGenerator
             Application.Run(new MainForm());
         }
 
-        public static void GeneratePWDCombinations(string keywords, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols)
+        public static void GeneratePWDCombinations(string keywords, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols, string usedWords)
         {
             File.WriteAllText(fullPath, "");
             List<List<string>> words = [];
@@ -29,10 +29,16 @@ namespace PWDGenerator
             List<string> symbols = [.. symbolsString.ToCharArray().Select(c => c.ToString())];
             List<string> numberVariations = [];
             List<string> wordsList = [.. keywords.Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries).Select(w => w.Trim().ToLower())];
+            List<string> usedWordsList = [];
 
             foreach (string word in wordsList)
             {
                 words.Add([.. GenerateCapitalizationVariations(word, maxChars)]);
+            }
+
+            foreach (string word in usedWords.Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries))
+            {
+                usedWordsList.AddRange(GenerateCapitalizationVariations(word, maxChars));
             }
 
             for (int i = 0; i <= maxNumber; i++)

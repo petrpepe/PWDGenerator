@@ -46,6 +46,8 @@
             maxCharLengthBox = new TextBox();
             label8 = new Label();
             numOfSymbolsNBox = new NumericUpDown();
+            usedWordsBox = new TextBox();
+            label9 = new Label();
             ((System.ComponentModel.ISupportInitialize)numOfSymbolsNBox).BeginInit();
             SuspendLayout();
             // 
@@ -114,13 +116,13 @@
             // 
             // savePathBox
             // 
-            savePathBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            savePathBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             savePathBox.Font = new Font("Segoe UI", 10F);
             savePathBox.Location = new Point(16, 309);
             savePathBox.Multiline = true;
             savePathBox.Name = "savePathBox";
             savePathBox.PlaceholderText = "C:\\...";
-            savePathBox.Size = new Size(597, 40);
+            savePathBox.Size = new Size(597, 47);
             savePathBox.TabIndex = 10;
             // 
             // maxNumBox
@@ -242,11 +244,33 @@
             numOfSymbolsNBox.Click += NumOfSymbolsNBox_ValueChanged;
             numOfSymbolsNBox.KeyUp += NumOfSymbolsNBox_ValueChanged;
             // 
+            // usedWordsBox
+            // 
+            usedWordsBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            usedWordsBox.Font = new Font("Segoe UI", 10F);
+            usedWordsBox.Location = new Point(16, 401);
+            usedWordsBox.Multiline = true;
+            usedWordsBox.Name = "usedWordsBox";
+            usedWordsBox.Size = new Size(597, 48);
+            usedWordsBox.TabIndex = 19;
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI", 10F);
+            label9.Location = new Point(16, 370);
+            label9.Name = "label9";
+            label9.Size = new Size(116, 19);
+            label9.TabIndex = 20;
+            label9.Text = "Zapatovaná slova";
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(624, 361);
+            ClientSize = new Size(624, 461);
+            Controls.Add(label9);
+            Controls.Add(usedWordsBox);
             Controls.Add(numOfSymbolsNBox);
             Controls.Add(label8);
             Controls.Add(maxCharLengthBox);
@@ -265,7 +289,7 @@
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(generateBtn);
-            MinimumSize = new Size(640, 400);
+            MinimumSize = new Size(640, 500);
             Name = "MainForm";
             Text = "Vygeneruj kombinace hesel a ulož do souboru";
             Load += Form1_Load;
@@ -293,5 +317,7 @@
         private TextBox maxCharLengthBox;
         private Label label8;
         private NumericUpDown numOfSymbolsNBox;
+        private TextBox usedWordsBox;
+        private Label label9;
     }
 }
