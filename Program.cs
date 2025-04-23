@@ -22,7 +22,7 @@ namespace PWDGenerator
             Application.Run(new MainForm());
         }
 
-        public static void GeneratePWDCombinations(string keywords, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols, string usedWords)
+        public static void GeneratePWDCombinations(string keywords, int maxNumber, string fullPath, DateTime? birthday, string symbolsString, int maxChars, int numOfSymbols)
         {
             File.WriteAllText(fullPath, "");
             List<List<string>> words = [];
@@ -37,11 +37,6 @@ namespace PWDGenerator
             foreach (string word in wordsList)
             {
                 words.Add([.. GenerateCapitalizationVariations(word, maxChars)]);
-            }
-
-            foreach (string word in usedWords.Split([',', ';', ' '], StringSplitOptions.RemoveEmptyEntries))
-            {
-                usedWordsList.AddRange(GenerateCapitalizationVariations(word, maxChars));
             }
 
             for (int i = 0; i <= maxNumber; i++)
@@ -275,10 +270,28 @@ namespace PWDGenerator
                 // Thread-safe final write
                 lock (fileLock)
                 {
-                    using var writer = new StreamWriter(fullPath, append: true, Encoding.UTF8, 1024 * 64);
+                    using var writer = GetStreamWriterWithSizeLimit(fullPath, 950 * 1024 * 1024); ;
                     writer.Write(localWriter.ToString());
                     if (outputBuffer.Count > 0)
                         FlushBuffer(writer, outputBuffer);
+
+                    static StreamWriter GetStreamWriterWithSizeLimit(string basePath, long sizeLimit)
+                    {
+                        string directory = Path.GetDirectoryName(basePath) ?? "";
+                        string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(basePath);
+                        string extension = Path.GetExtension(basePath);
+
+                        int fileIndex = 0;
+                        string currentFilePath = basePath;
+
+                        while (File.Exists(currentFilePath) && new FileInfo(currentFilePath).Length >= sizeLimit)
+                        {
+                            fileIndex++;
+                            currentFilePath = Path.Combine(directory, $"{fileNameWithoutExtension}_{fileIndex}{extension}");
+                        }
+
+                        return new StreamWriter(currentFilePath, append: true, Encoding.UTF8, 1024 * 64);
+                    }
                 }
             });
         }
